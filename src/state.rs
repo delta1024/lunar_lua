@@ -1,9 +1,12 @@
-use core::panic;
-use std::{ffi::CString, ptr::NonNull};
+use core::{panic, str};
+use std::{ffi::{CString, CStr}, ptr::NonNull, slice};
 
 use crate::{
     error::Result,
-    raw_lua::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, lua_close, LUA_OK},
+    raw_lua::{
+        luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, lua_close, lua_gettop,
+         lua_settop, LUA_OK, lua_tolstring, lua_pcallk,
+    },
 };
 
 #[derive(Debug, Default)]
@@ -87,6 +90,46 @@ impl State {
             }
         }
         Ok(())
+    }
+    pub fn pcall(&mut self, nargs: u32, nresults: u32, msgh: u32) -> Result<()> {
+        let r = unsafe { lua_pcallk(self.0.as_mut(), nargs as i32, nresults as i32, msgh as i32, 0, None) };
+        if r != 0 {
+            return Err(r.into());
+        }
+        Ok(())
+    }
+    /// Pops n elements from the stack.
+    pub fn pop(&mut self, n: u32) {
+        self.set_op(self.get_op() - n);
+    }
+    ///  Accepts any index, or 0, and sets the stack top to this index. If the new top is greater than the old one,
+    ///  then the new elements are filled with nil. If index is 0, then all stack elements are removed.
+    ///
+    /// This function can run arbitrary code when removing an index marked as to-be-closed from the stack.
+    pub fn set_op(&mut self, idx: u32) {
+        unsafe {
+            lua_settop(self.0.as_mut(), idx as i32);
+        }
+    }
+    pub fn to_string(&self, idx: i32) -> &str {
+        let ptr: *const lua_State = unsafe {
+           self.0.as_ref() 
+        }; 
+        let ptr = unsafe {
+            lua_tolstring(ptr.cast_mut(), idx, std::ptr::null_mut())
+        };
+        
+        let c_str = unsafe {
+            CStr::from_ptr(ptr)
+        };
+        c_str.to_str().unwrap()
+    }
+    ///  Returns the index of the top element in the stack. Because indices start at 1, this result is equal to the number of elements in the stack; in particular, 0 means an empty stack.
+    pub fn get_op(&self) -> u32 {
+        unsafe {
+            let ptr: *const lua_State = self.0.as_ref();
+            lua_gettop(ptr.cast_mut()) as u32
+        }
     }
 }
 #[cfg(test)]
