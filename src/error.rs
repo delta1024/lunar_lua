@@ -1,12 +1,12 @@
-use std::{fmt::Display, error, result};
+use std::{error, fmt::Display, result};
 
-use crate::raw_lua::{LUA_ERRRUN, LUA_ERRMEM, LUA_ERRERR, LUA_ERRSYNTAX, LUA_ERRFILE};
+use crate::raw_lua::{LUA_ERRERR, LUA_ERRFILE, LUA_ERRMEM, LUA_ERRRUN, LUA_ERRSYNTAX};
 
 #[derive(Debug)]
 pub enum Error {
     /// a runtime error.
     Run,
-    /// memory allocation error. For such errors, Lua does not call the message handler. 
+    /// memory allocation error. For such errors, Lua does not call the message handler.
     Mem,
     /// error while running the message handler.
     Err,
@@ -16,9 +16,9 @@ pub enum Error {
     File,
 }
 
-impl From<u32> for Error {
-    fn from(value: u32) -> Self {
-        match value {
+impl From<i32> for Error {
+    fn from(value: i32) -> Self {
+        match value as u32 {
             LUA_ERRRUN => Self::Run,
             LUA_ERRMEM => Self::Mem,
             LUA_ERRERR => Self::Err,
