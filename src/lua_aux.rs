@@ -1,9 +1,13 @@
 use std::ffi::CString;
 
 use crate::{
-    ffi::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, LUA_OK, luaL_error, luaL_loadfilex},
+    check_for_err,
+    ffi::{
+        luaL_error, luaL_loadbufferx, luaL_loadfilex, luaL_newstate, luaL_openlibs, lua_State,
+        LUA_OK,
+    },
     wrapper::LuaError,
-    LuaConn, check_for_err,
+    LuaConn,
 };
 /// Formats and reports an error. Calls [aux_error](LuaAuxLib::aux_error).
 #[macro_export]
@@ -15,7 +19,7 @@ macro_rules! lua_error {
         }
     };
 }
-/// Creates a new Lua state. It calls [crate::lua_core::new_state] with an allocator based on the ISO C allocation functions and then sets a warning function and a panic function (see §4.4) that print messages to the standard error output. 
+/// Creates a new Lua state. It calls [crate::lua_core::new_state] with an allocator based on the ISO C allocation functions and then sets a warning function and a panic function (see §4.4) that print messages to the standard error output.
 pub fn aux_new_state() -> *mut lua_State {
     unsafe { luaL_newstate() }
 }
@@ -42,7 +46,11 @@ pub trait LuaAuxLib: LuaConn {
     fn aux_load_file(&self, file_name: &str) -> Result<(), LuaError> {
         let c_str = CString::new(file_name).unwrap();
         let result = unsafe {
-            luaL_loadfilex(self.get_conn().get_mut_ptr(), c_str.as_ptr(), std::ptr::null())
+            luaL_loadfilex(
+                self.get_conn().get_mut_ptr(),
+                c_str.as_ptr(),
+                std::ptr::null(),
+            )
         };
         check_for_err!(result);
         Ok(())
@@ -55,7 +63,7 @@ pub trait LuaAuxLib: LuaConn {
     }
     ///  Raises an error. It also adds at the beginning of the message the file name and the line number where the error occurred, if this information is available.
     ///
-    /// This function never returns, but it is an idiom to use it in C functions as return luaL_error(args). 
+    /// This function never returns, but it is an idiom to use it in C functions as return luaL_error(args).
     fn aux_error<T: ToString>(&self, message: T) {
         let message = CString::new(message.to_string()).unwrap();
         unsafe {

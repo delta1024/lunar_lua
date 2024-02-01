@@ -6,9 +6,10 @@ use std::{
 
 use crate::{
     ffi::{
-        lua_checkstack, lua_copy, lua_gettop, lua_pcallk, lua_pushboolean, lua_pushlstring,
-        lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate, lua_error, lua_getglobal,
+        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_error, lua_getglobal, lua_gettable,
+        lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring, lua_pushnil,
+        lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable,
+        lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -21,11 +22,9 @@ macro_rules! check_for_err {
         }
     };
 }
-/// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call. 
+/// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call.
 pub fn new_state(f: lua_Alloc, ud: *mut ::std::os::raw::c_void) -> *mut lua_State {
-    unsafe {
-        lua_newstate(f, ud)
-    }
+    unsafe { lua_newstate(f, ud) }
 }
 ///  a container for valid stack types
 pub enum LuaStackValue<'a> {
@@ -92,12 +91,19 @@ pub trait LuaCore: LuaConn {
             CStr::from_ptr(ptr).to_str().unwrap()
         }
     }
-    /// Pushes onto the stack the value of the global name. Returns the type of that value. 
+    /// Pushes onto the stack the value of the global name. Returns the type of that value.
     fn get_global(&self, name: &str) -> LuaType {
         let name = CString::new(name).unwrap();
         unsafe {
             let ty = lua_getglobal(self.get_conn().get_mut_ptr(), name.as_ptr());
             mem::transmute(ty)
+        }
+    }
+    /// Pops a value from the stack and sets it as the new value of global name.
+    fn set_global(&self, name: &str) {
+        let name = CString::new(name).unwrap();
+        unsafe {
+            lua_setglobal(self.get_conn().get_mut_ptr(), name.as_ptr());
         }
     }
     /// Pops n elements from the stack.
@@ -117,6 +123,25 @@ pub trait LuaCore: LuaConn {
         unsafe {
             let ptr = self.get_conn().get_mut_ptr();
             lua_gettop(ptr)
+        }
+    }
+    ///  Pushes onto the stack the value t\[k\], where t is the value at the given index and k is the value on the top of the stack.
+    ///
+    /// This function pops the key from the stack, pushing the resulting value in its place. As in Lua, this function may trigger a metamethod for the "index" event (see §2.4).
+    ///
+    /// Returns the type of the pushed value.
+    fn get_table(&self, idx: i32) -> LuaType {
+        unsafe {
+            let ty = lua_gettable(self.get_conn().get_mut_ptr(), idx);
+            mem::transmute(ty)
+        }
+    }
+    ///  Does the equivalent to t\[k\] = v, where t is the value at the given index, v is the value on the top of the stack, and k is the value just below the top.
+    ///
+    /// This function pops both the key and the value from the stack. As in Lua, this function may trigger a metamethod for the "newindex" event (see §2.4).
+    fn set_table(&self, idx: i32) {
+        unsafe {
+            lua_settable(self.get_conn().get_mut_ptr(), idx);
         }
     }
     /// Pushes a nil value onto the stack.
@@ -208,6 +233,10 @@ pub trait LuaCore: LuaConn {
     fn is_string(&self, idx: i32) -> bool {
         matches!(self.get_type(idx), LuaType::String)
     }
+    /// Returns true if the value at the given index is a table, and false otherwise.
+    fn is_table(&self, idx: i32) -> bool {
+        matches!(self.get_type(idx), LuaType::Table)
+    }
     /// Equivalent to lua_tolstring with len equal to NULL.
     fn to_string(&self, idx: i32) -> &str {
         unsafe {
@@ -264,11 +293,11 @@ pub trait LuaCore: LuaConn {
             lua_rotate(self.get_conn().get_mut_ptr(), idx, n);
         }
     }
-    /// Raises a Lua error, using the value on the top of the stack as the error object. This function does a long jump, and therefore never returns (see [aux_error](crate::LuaAuxLib::aux_error)). 
+    /// Raises a Lua error, using the value on the top of the stack as the error object. This function does a long jump, and therefore never returns (see [aux_error](crate::LuaAuxLib::aux_error)).
     fn error(&self) {
         unsafe {
             lua_error(self.get_conn().get_mut_ptr());
-        } 
+        }
     }
 }
 impl<T: LuaConn> LuaCore for T {}
