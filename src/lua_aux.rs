@@ -20,7 +20,7 @@ pub fn aux_new_state() -> *mut lua_State {
     unsafe { luaL_newstate() }
 }
 pub trait LuaAuxLib: LuaConn {
-    /// Equivalent to [luaL_loadbufferx](crate::ffi::luaL_loadbufferx) with mode equal to NULL.
+    /// Equivalent to [luaL_loadbufferx] with mode equal to NULL.
     fn aux_load_buffer(&self, buff: &str, name: &str) -> Result<(), LuaError> {
         let (buff, name) = (
             CString::new(buff).expect("invalid string"),

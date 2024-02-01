@@ -257,6 +257,21 @@
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
 <a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::str;
 <span class="kw">use </span>std::{
     ffi::{CStr, CString},
@@ -267,12 +282,13 @@
     ffi::{
         lua_checkstack, lua_copy, lua_gettop, lua_pcallk, lua_pushboolean, lua_pushlstring,
         lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate,
+        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate, lua_error, lua_getglobal,
     },
     LuaConn, LuaError, LuaType,
 };
 
-<span class="macro">macro_rules! </span>check_for_err {
+<span class="attr">#[macro_export]
+</span><span class="macro">macro_rules! </span>check_for_err {
     (<span class="macro-nonterminal">$result</span>:tt) =&gt; {
         <span class="kw">if </span><span class="macro-nonterminal">$result </span>!= LUA_OK <span class="kw">as </span>i32 {
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">unsafe </span>{ std::mem::transmute(<span class="macro-nonterminal">$result</span>) });
@@ -348,6 +364,14 @@
             <span class="kw">let </span>ptr = <span class="self">self</span>.get_conn().get_mut_ptr();
             <span class="kw">let </span>ptr = lua_typename(ptr, index);
             CStr::from_ptr(ptr).to_str().unwrap()
+        }
+    }
+    <span class="doccomment">/// Pushes onto the stack the value of the global name. Returns the type of that value. 
+    </span><span class="kw">fn </span>get_global(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; LuaType {
+        <span class="kw">let </span>name = CString::new(name).unwrap();
+        <span class="kw">unsafe </span>{
+            <span class="kw">let </span>ty = lua_getglobal(<span class="self">self</span>.get_conn().get_mut_ptr(), name.as_ptr());
+            mem::transmute(ty)
         }
     }
     <span class="doccomment">/// Pops n elements from the stack.
@@ -513,6 +537,12 @@
         <span class="kw">unsafe </span>{
             lua_rotate(<span class="self">self</span>.get_conn().get_mut_ptr(), idx, n);
         }
+    }
+    <span class="doccomment">/// Raises a Lua error, using the value on the top of the stack as the error object. This function does a long jump, and therefore never returns (see [aux_error](crate::LuaAuxLib::aux_error)). 
+    </span><span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">unsafe </span>{
+            lua_error(<span class="self">self</span>.get_conn().get_mut_ptr());
+        } 
     }
 }
 <span class="kw">impl</span>&lt;T: LuaConn&gt; LuaCore <span class="kw">for </span>T {}
