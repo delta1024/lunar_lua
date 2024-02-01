@@ -59,7 +59,7 @@ pub use wrapper::*;
 #[repr(transparent)]
 pub struct LuaConnection<'state>(&'state lua_State);
 impl LuaConnection<'_> {
-    unsafe fn get_mut_ptr(&self) -> *mut lua_State {
+  pub unsafe fn get_mut_ptr(&self) -> *mut lua_State {
         (self.0 as *const lua_State).cast_mut()
     }
 }
