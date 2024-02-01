@@ -1,10 +1,20 @@
 use std::ffi::CString;
 
 use crate::{
-    ffi::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, LUA_OK},
+    ffi::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, LUA_OK, luaL_error},
     wrapper::LuaError,
     LuaConn,
 };
+/// Formats and reports an error. Calls [aux_error](LuaAuxLib::aux_error).
+#[macro_export]
+macro_rules! lua_error {
+    ($self:ident, $($fmt:tt)*) => {
+        {
+        use $crate::LuaAuxLib;
+        $self.aux_error(format!($($fmt)*))
+        }
+    };
+}
 /// Creates a new Lua state. It calls [crate::lua_core::new_state] with an allocator based on the ISO C allocation functions and then sets a warning function and a panic function (see §4.4) that print messages to the standard error output. 
 pub fn aux_new_state() -> *mut lua_State {
     unsafe { luaL_newstate() }
@@ -34,6 +44,15 @@ pub trait LuaAuxLib: LuaConn {
     fn aux_open_libs(&self) {
         unsafe {
             luaL_openlibs(self.get_conn().get_mut_ptr());
+        }
+    }
+    ///  Raises an error. It also adds at the beginning of the message the file name and the line number where the error occurred, if this information is available.
+    ///
+    /// This function never returns, but it is an idiom to use it in C functions as return luaL_error(args). 
+    fn aux_error<T: ToString>(&self, message: T) {
+        let message = CString::new(message.to_string()).unwrap();
+        unsafe {
+            luaL_error(self.get_conn().get_mut_ptr(), message.as_ptr());
         }
     }
 }

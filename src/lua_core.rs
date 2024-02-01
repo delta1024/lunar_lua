@@ -8,7 +8,7 @@ use crate::{
     ffi::{
         lua_checkstack, lua_copy, lua_gettop, lua_pcallk, lua_pushboolean, lua_pushlstring,
         lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate,
+        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate, lua_error,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -254,6 +254,12 @@ pub trait LuaCore: LuaConn {
         unsafe {
             lua_rotate(self.get_conn().get_mut_ptr(), idx, n);
         }
+    }
+    /// Raises a Lua error, using the value on the top of the stack as the error object. This function does a long jump, and therefore never returns (see [aux_error](crate::LuaAuxLib::aux_error)). 
+    fn error(&self) {
+        unsafe {
+            lua_error(self.get_conn().get_mut_ptr());
+        } 
     }
 }
 impl<T: LuaConn> LuaCore for T {}
