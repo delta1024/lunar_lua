@@ -64,12 +64,24 @@
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ffi::CString;
 
 <span class="kw">use crate</span>::{
-    ffi::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, LUA_OK, luaL_error, luaL_loadfilex},
+    check_for_err,
+    ffi::{
+        luaL_error, luaL_loadbufferx, luaL_loadfilex, luaL_newstate, luaL_openlibs, lua_State,
+        LUA_OK,
+    },
     wrapper::LuaError,
-    LuaConn, check_for_err,
+    LuaConn,
 };
 <span class="doccomment">/// Formats and reports an error. Calls [aux_error](LuaAuxLib::aux_error).
 </span><span class="attr">#[macro_export]
@@ -81,7 +93,7 @@
         }
     };
 }
-<span class="doccomment">/// Creates a new Lua state. It calls [crate::lua_core::new_state] with an allocator based on the ISO C allocation functions and then sets a warning function and a panic function (see §4.4) that print messages to the standard error output. 
+<span class="doccomment">/// Creates a new Lua state. It calls [crate::lua_core::new_state] with an allocator based on the ISO C allocation functions and then sets a warning function and a panic function (see §4.4) that print messages to the standard error output.
 </span><span class="kw">pub fn </span>aux_new_state() -&gt; <span class="kw-2">*mut </span>lua_State {
     <span class="kw">unsafe </span>{ luaL_newstate() }
 }
@@ -108,7 +120,11 @@
     </span><span class="kw">fn </span>aux_load_file(<span class="kw-2">&amp;</span><span class="self">self</span>, file_name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(), LuaError&gt; {
         <span class="kw">let </span>c_str = CString::new(file_name).unwrap();
         <span class="kw">let </span>result = <span class="kw">unsafe </span>{
-            luaL_loadfilex(<span class="self">self</span>.get_conn().get_mut_ptr(), c_str.as_ptr(), std::ptr::null())
+            luaL_loadfilex(
+                <span class="self">self</span>.get_conn().get_mut_ptr(),
+                c_str.as_ptr(),
+                std::ptr::null(),
+            )
         };
         <span class="macro">check_for_err!</span>(result);
         <span class="prelude-val">Ok</span>(())
@@ -121,7 +137,7 @@
     }
     <span class="doccomment">///  Raises an error. It also adds at the beginning of the message the file name and the line number where the error occurred, if this information is available.
     ///
-    /// This function never returns, but it is an idiom to use it in C functions as return luaL_error(args). 
+    /// This function never returns, but it is an idiom to use it in C functions as return luaL_error(args).
     </span><span class="kw">fn </span>aux_error&lt;T: ToString&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, message: T) {
         <span class="kw">let </span>message = CString::new(message.to_string()).unwrap();
         <span class="kw">unsafe </span>{

@@ -132,7 +132,7 @@
 <span class="attr">#[repr(transparent)]
 </span><span class="kw">pub struct </span>LuaConnection&lt;<span class="lifetime">&#39;state</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;state </span>lua_State);
 <span class="kw">impl </span>LuaConnection&lt;<span class="lifetime">&#39;_</span>&gt; {
-  <span class="kw">pub unsafe fn </span>get_mut_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>lua_State {
+    <span class="kw">pub unsafe fn </span>get_mut_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>lua_State {
         (<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span><span class="kw-2">*const </span>lua_State).cast_mut()
     }
 }

@@ -272,6 +272,35 @@
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::str;
 <span class="kw">use </span>std::{
     ffi::{CStr, CString},
@@ -280,9 +309,10 @@
 
 <span class="kw">use crate</span>::{
     ffi::{
-        lua_checkstack, lua_copy, lua_gettop, lua_pcallk, lua_pushboolean, lua_pushlstring,
-        lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate, lua_error, lua_getglobal,
+        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_error, lua_getglobal, lua_gettable,
+        lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring, lua_pushnil,
+        lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable,
+        lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -295,11 +325,9 @@
         }
     };
 }
-<span class="doccomment">/// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call. 
+<span class="doccomment">/// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call.
 </span><span class="kw">pub fn </span>new_state(f: lua_Alloc, ud: <span class="kw-2">*mut </span>::std::os::raw::c_void) -&gt; <span class="kw-2">*mut </span>lua_State {
-    <span class="kw">unsafe </span>{
-        lua_newstate(f, ud)
-    }
+    <span class="kw">unsafe </span>{ lua_newstate(f, ud) }
 }
 <span class="doccomment">///  a container for valid stack types
 </span><span class="kw">pub enum </span>LuaStackValue&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -366,12 +394,19 @@
             CStr::from_ptr(ptr).to_str().unwrap()
         }
     }
-    <span class="doccomment">/// Pushes onto the stack the value of the global name. Returns the type of that value. 
+    <span class="doccomment">/// Pushes onto the stack the value of the global name. Returns the type of that value.
     </span><span class="kw">fn </span>get_global(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; LuaType {
         <span class="kw">let </span>name = CString::new(name).unwrap();
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>ty = lua_getglobal(<span class="self">self</span>.get_conn().get_mut_ptr(), name.as_ptr());
             mem::transmute(ty)
+        }
+    }
+    <span class="doccomment">/// Pops a value from the stack and sets it as the new value of global name.
+    </span><span class="kw">fn </span>set_global(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) {
+        <span class="kw">let </span>name = CString::new(name).unwrap();
+        <span class="kw">unsafe </span>{
+            lua_setglobal(<span class="self">self</span>.get_conn().get_mut_ptr(), name.as_ptr());
         }
     }
     <span class="doccomment">/// Pops n elements from the stack.
@@ -391,6 +426,25 @@
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>ptr = <span class="self">self</span>.get_conn().get_mut_ptr();
             lua_gettop(ptr)
+        }
+    }
+    <span class="doccomment">///  Pushes onto the stack the value t\[k\], where t is the value at the given index and k is the value on the top of the stack.
+    ///
+    /// This function pops the key from the stack, pushing the resulting value in its place. As in Lua, this function may trigger a metamethod for the &quot;index&quot; event (see §2.4).
+    ///
+    /// Returns the type of the pushed value.
+    </span><span class="kw">fn </span>get_table(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; LuaType {
+        <span class="kw">unsafe </span>{
+            <span class="kw">let </span>ty = lua_gettable(<span class="self">self</span>.get_conn().get_mut_ptr(), idx);
+            mem::transmute(ty)
+        }
+    }
+    <span class="doccomment">///  Does the equivalent to t\[k\] = v, where t is the value at the given index, v is the value on the top of the stack, and k is the value just below the top.
+    ///
+    /// This function pops both the key and the value from the stack. As in Lua, this function may trigger a metamethod for the &quot;newindex&quot; event (see §2.4).
+    </span><span class="kw">fn </span>set_table(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) {
+        <span class="kw">unsafe </span>{
+            lua_settable(<span class="self">self</span>.get_conn().get_mut_ptr(), idx);
         }
     }
     <span class="doccomment">/// Pushes a nil value onto the stack.
@@ -482,6 +536,10 @@
     </span><span class="kw">fn </span>is_string(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; bool {
         <span class="macro">matches!</span>(<span class="self">self</span>.get_type(idx), LuaType::String)
     }
+    <span class="doccomment">/// Returns true if the value at the given index is a table, and false otherwise.
+    </span><span class="kw">fn </span>is_table(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>.get_type(idx), LuaType::Table)
+    }
     <span class="doccomment">/// Equivalent to lua_tolstring with len equal to NULL.
     </span><span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="kw">unsafe </span>{
@@ -538,11 +596,11 @@
             lua_rotate(<span class="self">self</span>.get_conn().get_mut_ptr(), idx, n);
         }
     }
-    <span class="doccomment">/// Raises a Lua error, using the value on the top of the stack as the error object. This function does a long jump, and therefore never returns (see [aux_error](crate::LuaAuxLib::aux_error)). 
+    <span class="doccomment">/// Raises a Lua error, using the value on the top of the stack as the error object. This function does a long jump, and therefore never returns (see [aux_error](crate::LuaAuxLib::aux_error)).
     </span><span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">unsafe </span>{
             lua_error(<span class="self">self</span>.get_conn().get_mut_ptr());
-        } 
+        }
     }
 }
 <span class="kw">impl</span>&lt;T: LuaConn&gt; LuaCore <span class="kw">for </span>T {}
