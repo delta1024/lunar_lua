@@ -8,7 +8,7 @@ use crate::{
     ffi::{
         lua_checkstack, lua_copy, lua_gettop, lua_pcallk, lua_pushboolean, lua_pushlstring,
         lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
+        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -19,6 +19,12 @@ macro_rules! check_for_err {
             return Err(unsafe { std::mem::transmute($result) });
         }
     };
+}
+/// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call. 
+pub fn new_state(f: lua_Alloc, ud: *mut ::std::os::raw::c_void) -> *mut lua_State {
+    unsafe {
+        lua_newstate(f, ud)
+    }
 }
 ///  a container for valid stack types
 pub enum LuaStackValue<'a> {

@@ -5,7 +5,7 @@ use crate::{
     wrapper::LuaError,
     LuaConn,
 };
-
+/// Creates a new Lua state. It calls [crate::lua_core::new_state] with an allocator based on the ISO C allocation functions and then sets a warning function and a panic function (see §4.4) that print messages to the standard error output. 
 pub fn aux_new_state() -> *mut lua_State {
     unsafe { luaL_newstate() }
 }
