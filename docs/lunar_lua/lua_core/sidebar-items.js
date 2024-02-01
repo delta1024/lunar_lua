@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["LuaStackValue"],"trait":["LuaCore"]};
+window.SIDEBAR_ITEMS = {"enum":["LuaStackValue"],"fn":["new_state"],"trait":["LuaCore"]};

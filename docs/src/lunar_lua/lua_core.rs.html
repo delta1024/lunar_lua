@@ -251,6 +251,12 @@
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::str;
 <span class="kw">use </span>std::{
     ffi::{CStr, CString},
@@ -261,7 +267,7 @@
     ffi::{
         lua_checkstack, lua_copy, lua_gettop, lua_pcallk, lua_pushboolean, lua_pushlstring,
         lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
+        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -272,6 +278,12 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">unsafe </span>{ std::mem::transmute(<span class="macro-nonterminal">$result</span>) });
         }
     };
+}
+<span class="doccomment">/// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call. 
+</span><span class="kw">pub fn </span>new_state(f: lua_Alloc, ud: <span class="kw-2">*mut </span>::std::os::raw::c_void) -&gt; <span class="kw-2">*mut </span>lua_State {
+    <span class="kw">unsafe </span>{
+        lua_newstate(f, ud)
+    }
 }
 <span class="doccomment">///  a container for valid stack types
 </span><span class="kw">pub enum </span>LuaStackValue&lt;<span class="lifetime">&#39;a</span>&gt; {
