@@ -48,6 +48,13 @@ impl From<Option<()>> for LuaStackValue<'_> {
     }
 }
 pub trait LuaCore: LuaConn {
+    ///  Calls a function (or a callable object) in protected mode.
+    ///
+    /// Both nargs and nresults have the same meaning as in [lua_call](crate::ffi::lua_callk). If there are no errors during the call, lua_pcall behaves exactly like [lua_call](crate::ffi::lua_callk). However, if there is any error, [pcall](LuaCore::pcall) catches it, pushes a single value on the stack (the error object), and returns an error code. Like [lua_call](crate::ffi::lua_callk), lua_pcall always removes the function and its arguments from the stack.
+    ///
+    /// If msgh is 0, then the error object returned on the stack is exactly the original error object. Otherwise, msgh is the stack index of a message handler. (This index cannot be a pseudo-index.) In case of runtime errors, this handler will be called with the error object and its return value will be the object returned on the stack by [pcall](LuaCore::pcall).
+    ///
+    /// Typically, the message handler is used to add more debug information to the error object, such as a stack traceback. Such information cannot be gathered after the return of [pcall](LuaCore::pcall), since by then the stack has unwound.
     fn pcall(&self, nargs: i32, nresults: i32, msgh: i32) -> Result<(), LuaError> {
         let result = unsafe {
             lua_pcallk(

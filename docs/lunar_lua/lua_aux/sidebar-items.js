@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["aux_new_state"],"trait":["LuaAuxLib"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["error","raw_lua","state"]};
+window.SIDEBAR_ITEMS = {"mod":["ffi","lua_aux","lua_core","lua_lib","wrapper"],"struct":["LuaConnection"],"trait":["LuaConn"]};

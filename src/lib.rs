@@ -20,9 +20,9 @@
 //! ```
 //!
 //! # Custom State
-//! Creating a custom state is as easl as implemanting the [LuaConn] trait.
+//! Creating a custom state is as easy as implemanting the [LuaConn] trait.
 //!
-//! ```no_run
+//! ```
 //! use lunar_lua::{lua_aux::aux_new_state, ffi::lua_State,LuaConn, LuaCore, LuaConnection};
 //! struct State(*mut lua_State);
 //! unsafe impl LuaConn for State {
@@ -45,7 +45,7 @@ pub mod ffi;
 pub mod lua_aux;
 pub mod lua_core;
 pub mod lua_lib;
-/// Defaule lua wrapper.
+/// Default lua wrapper.
 pub mod wrapper;
 use ffi::lua_State;
 /// lua auxilary library
