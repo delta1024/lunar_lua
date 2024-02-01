@@ -1,6 +1,6 @@
-use lunar_lua::state::{State, LuaType};
+use lunar_lua::state::{LuaType, State};
 fn stack_dump(lua: &mut State) {
-let top = lua.get_top() as i32;
+    let top = lua.get_top() as i32;
 
     for i in 1..=top {
         match lua.get_type(i) {
@@ -13,7 +13,6 @@ let top = lua.get_top() as i32;
         print!(" ");
     }
     println!();
-
 }
 fn main() {
     let mut lua = State::new();
@@ -37,5 +36,4 @@ fn main() {
 
     lua.set_top(-5);
     stack_dump(&mut lua);
-
 }

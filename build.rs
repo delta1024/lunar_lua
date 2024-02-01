@@ -12,7 +12,7 @@ fn main() {
 
     let out_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
-    lua.write_to_file(out_path.join("src/raw_lua.rs"))
+    lua.write_to_file(out_path.join("src/ffi.rs"))
         .expect("Couldn't write bindings");
     for path in &["includes/lua.h", "build.rs"] {
         println!("cargo:rerun-if-changed={}", path);
