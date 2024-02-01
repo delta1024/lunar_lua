@@ -1,9 +1,9 @@
 use std::ffi::CString;
 
 use crate::{
-    ffi::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, LUA_OK, luaL_error},
+    ffi::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, LUA_OK, luaL_error, luaL_loadfilex},
     wrapper::LuaError,
-    LuaConn,
+    LuaConn, check_for_err,
 };
 /// Formats and reports an error. Calls [aux_error](LuaAuxLib::aux_error).
 #[macro_export]
@@ -35,9 +35,16 @@ pub trait LuaAuxLib: LuaConn {
                 std::ptr::null_mut(),
             )
         };
-        if result != LUA_OK as i32 {
-            return Err(unsafe { std::mem::transmute(result) });
-        }
+        check_for_err!(result);
+        Ok(())
+    }
+    /// Equivalent to [luaL_loadfilex] with mode equal to NULL.
+    fn aux_load_file(&self, file_name: &str) -> Result<(), LuaError> {
+        let c_str = CString::new(file_name).unwrap();
+        let result = unsafe {
+            luaL_loadfilex(self.get_conn().get_mut_ptr(), c_str.as_ptr(), std::ptr::null())
+        };
+        check_for_err!(result);
         Ok(())
     }
     /// Opens all standard Lua libraries into the given state.  

@@ -8,11 +8,12 @@ use crate::{
     ffi::{
         lua_checkstack, lua_copy, lua_gettop, lua_pcallk, lua_pushboolean, lua_pushlstring,
         lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate, lua_error,
+        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_Alloc, lua_State, lua_newstate, lua_error, lua_getglobal,
     },
     LuaConn, LuaError, LuaType,
 };
 
+#[macro_export]
 macro_rules! check_for_err {
     ($result:tt) => {
         if $result != LUA_OK as i32 {
@@ -89,6 +90,14 @@ pub trait LuaCore: LuaConn {
             let ptr = self.get_conn().get_mut_ptr();
             let ptr = lua_typename(ptr, index);
             CStr::from_ptr(ptr).to_str().unwrap()
+        }
+    }
+    /// Pushes onto the stack the value of the global name. Returns the type of that value. 
+    fn get_global(&self, name: &str) -> LuaType {
+        let name = CString::new(name).unwrap();
+        unsafe {
+            let ty = lua_getglobal(self.get_conn().get_mut_ptr(), name.as_ptr());
+            mem::transmute(ty)
         }
     }
     /// Pops n elements from the stack.
