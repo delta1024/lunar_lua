@@ -39,7 +39,7 @@
 //! }
 //! ```
 
-/// Raw bindings to lu
+/// Raw bindings to lua
 #[allow(non_snake_case, non_upper_case_globals, non_camel_case_types)]
 pub mod ffi;
 pub mod lua_aux;

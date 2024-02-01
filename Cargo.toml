@@ -3,6 +3,8 @@ name = "lunar_lua"
 version = "0.0.1"
 edition = "2021"
 description = "Safe bindings to lua"
+repository = "https://github.com/delta1024/lunar_lua.git"
+documentation = "delta1024.github.io/lunar_lua/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
