@@ -1,15 +1,13 @@
 use std::ffi::CString;
 
 use crate::{
-    ffi::{luaL_loadbufferx, luaL_openlibs, LUA_OK, lua_State, luaL_newstate},
+    ffi::{luaL_loadbufferx, luaL_newstate, luaL_openlibs, lua_State, LUA_OK},
     wrapper::LuaError,
     LuaConn,
 };
 
 pub fn aux_new_state() -> *mut lua_State {
-    unsafe {
-        luaL_newstate()
-    }
+    unsafe { luaL_newstate() }
 }
 pub trait LuaAuxLib: LuaConn {
     fn aux_load_buffer(&self, buff: &str, name: &str) -> Result<(), LuaError> {

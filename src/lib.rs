@@ -1,6 +1,6 @@
 //! # Safe bindings to lua.
 //!
-//! Like lua, lunar_lua aimes to be extensible. 
+//! Like lua, lunar_lua aimes to be extensible.
 //! For this reson all access to the lua api is provided
 //! through three traits:
 //! * [LuaCore]
@@ -21,7 +21,7 @@
 //!
 //! # Custom State
 //! Creating a custom state is as easl as implemanting the [LuaConn] trait.
-//! 
+//!
 //! ```no_run
 //! use lunar_lua::{lua_aux::aux_new_state, ffi::lua_State,LuaConn, LuaCore, LuaConnection};
 //! struct State(*mut lua_State);
@@ -45,10 +45,14 @@ pub mod ffi;
 pub mod lua_aux;
 pub mod lua_core;
 pub mod lua_lib;
+/// Defaule lua wrapper.
 pub mod wrapper;
 use ffi::lua_State;
+/// lua auxilary library
 pub use lua_aux::LuaAuxLib;
+/// lua core library
 pub use lua_core::LuaCore;
+/// lua standard library
 pub use lua_lib::LuaStandardLib;
 pub use wrapper::*;
 
@@ -59,7 +63,7 @@ impl LuaConnection<'_> {
         (self.0 as *const lua_State).cast_mut()
     }
 }
-impl <'state> From<&'state lua_State> for LuaConnection<'state> {
+impl<'state> From<&'state lua_State> for LuaConnection<'state> {
     fn from(value: &'state lua_State) -> Self {
         Self(value)
     }
