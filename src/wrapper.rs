@@ -1,10 +1,7 @@
-use std::{ffi::CStr, mem, ptr::NonNull};
+use std::ptr::NonNull;
 
 use crate::{
-    ffi::{
-        luaL_newstate, lua_State, lua_close, lua_pcallk, lua_settop, lua_tolstring, lua_type,
-        lua_typename, LUA_OK,
-    },
+    ffi::{luaL_newstate, lua_State, lua_close},
     LuaConn,
 };
 

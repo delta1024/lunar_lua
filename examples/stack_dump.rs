@@ -1,10 +1,10 @@
-use lunar_lua::state::{LuaType, State};
+use lunar_lua::{LuaCore, LuaType, State};
 fn stack_dump(lua: &mut State) {
     let top = lua.get_top() as i32;
 
     for i in 1..=top {
         match lua.get_type(i) {
-            LuaType::String => print!("{}", lua.to_string(i).unwrap_or_default()),
+            LuaType::String => print!("{}", lua.to_string(i)),
             LuaType::Boolean => print!("{}", lua.to_boolean(i)),
             LuaType::Number => print!("{}", lua.to_number(i)),
             _ => print!("{}", lua.type_name(i)),

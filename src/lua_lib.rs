@@ -2,8 +2,8 @@ use std::ffi::CString;
 
 use crate::{
     ffi::{
-        luaL_requiref, lua_State, luaopen_base, luaopen_coroutine, luaopen_debug, luaopen_io,
-        luaopen_math, luaopen_os, luaopen_package, luaopen_string, luaopen_table, luaopen_utf8,
+        luaL_requiref, luaopen_base, luaopen_coroutine, luaopen_debug, luaopen_io, luaopen_math,
+        luaopen_os, luaopen_package, luaopen_string, luaopen_table, luaopen_utf8,
     },
     LuaConn,
 };
