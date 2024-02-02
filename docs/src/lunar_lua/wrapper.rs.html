@@ -56,11 +56,15 @@
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
 <a href="#58" id="58">58</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::ptr::NonNull;
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::{ptr::NonNull};
 
 <span class="kw">use crate</span>::{
-    ffi::{luaL_newstate, lua_State, lua_close},
-    LuaConn,
+    ffi::{luaL_newstate, lua_State},
+    LuaConn, LuaStateRef,
 };
 
 <span class="attr">#[repr(i32)]
@@ -93,7 +97,7 @@
 <span class="kw">impl </span>Drop <span class="kw">for </span>State {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">unsafe </span>{
-            lua_close(<span class="self">self</span>.get_conn().get_mut_ptr());
+            <span class="self">self</span>.borrow().close_conn();
         }
     }
 }
@@ -102,6 +106,7 @@
         <span class="kw">unsafe </span>{ <span class="kw">crate</span>::LuaConnection(<span class="self">self</span>.<span class="number">0</span>.as_ref()) }
     }
 }
+
 <span class="kw">impl </span>State {
     <span class="kw">pub fn </span>new() -&gt; State {
         <span class="kw">let </span>ptr = <span class="kw">unsafe </span>{
@@ -112,6 +117,9 @@
             NonNull::new_unchecked(ptr)
         };
         State(ptr)
+    }
+    <span class="kw">pub fn </span>borrow&lt;<span class="lifetime">&#39;state</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;state </span><span class="self">self</span>) -&gt; LuaStateRef&lt;<span class="lifetime">&#39;state</span>&gt; {
+        <span class="self">self</span>.get_conn().into()
     }
 }
 </code></pre></div></section></main></body></html>
