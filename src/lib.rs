@@ -47,7 +47,7 @@ pub mod lua_core;
 pub mod lua_lib;
 /// Default lua wrapper.
 pub mod wrapper;
-use ffi::lua_State;
+use ffi::{lua_State, lua_close};
 /// lua auxilary library
 pub use lua_aux::LuaAuxLib;
 /// lua core library
@@ -57,11 +57,13 @@ pub use lua_lib::LuaStandardLib;
 pub use wrapper::*;
 
 #[repr(transparent)]
+#[derive(Debug, Clone, Copy)]
 pub struct LuaConnection<'state>(&'state lua_State);
 impl LuaConnection<'_> {
     pub unsafe fn get_mut_ptr(&self) -> *mut lua_State {
         (self.0 as *const lua_State).cast_mut()
     }
+
 }
 impl<'state> From<&'state lua_State> for LuaConnection<'state> {
     fn from(value: &'state lua_State) -> Self {
@@ -70,4 +72,23 @@ impl<'state> From<&'state lua_State> for LuaConnection<'state> {
 }
 pub unsafe trait LuaConn {
     fn get_conn(&self) -> LuaConnection<'_>;
+}
+#[repr(transparent)]
+#[derive(Debug, Clone, Copy)]
+pub struct LuaStateRef<'state>(LuaConnection<'state>); 
+impl LuaStateRef<'_> {
+    /// Closes the underlying lua state. 
+    pub unsafe fn close_conn(self) {
+        lua_close(self.get_conn().get_mut_ptr());
+    }
+}
+unsafe impl<'state> LuaConn for LuaStateRef<'state> {
+    fn get_conn(&self) -> LuaConnection<'_> {
+        self.0
+    }
+}
+impl<'state> From<LuaConnection<'state>> for LuaStateRef<'state> {
+    fn from(value: LuaConnection<'state>) -> Self {
+        Self(value)
+    }
 }

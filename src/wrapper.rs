@@ -1,8 +1,8 @@
-use std::ptr::NonNull;
+use std::{ptr::NonNull};
 
 use crate::{
-    ffi::{luaL_newstate, lua_State, lua_close},
-    LuaConn,
+    ffi::{luaL_newstate, lua_State},
+    LuaConn, LuaStateRef,
 };
 
 #[repr(i32)]
@@ -35,7 +35,7 @@ pub struct State(NonNull<lua_State>);
 impl Drop for State {
     fn drop(&mut self) {
         unsafe {
-            lua_close(self.get_conn().get_mut_ptr());
+            self.borrow().close_conn();
         }
     }
 }
@@ -44,6 +44,7 @@ unsafe impl LuaConn for State {
         unsafe { crate::LuaConnection(self.0.as_ref()) }
     }
 }
+
 impl State {
     pub fn new() -> State {
         let ptr = unsafe {
@@ -54,5 +55,8 @@ impl State {
             NonNull::new_unchecked(ptr)
         };
         State(ptr)
+    }
+    pub fn borrow<'state>(&'state self) -> LuaStateRef<'state> {
+        self.get_conn().into()
     }
 }
