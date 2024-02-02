@@ -308,6 +308,35 @@
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
 <a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::str;
 <span class="kw">use </span>std::{
     ffi::{CStr, CString},
@@ -316,11 +345,11 @@
 
 <span class="kw">use crate</span>::{
     ffi::{
-        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error, lua_getglobal,
-        lua_gettable, lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring,
-        lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal,
-        lua_settable, lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type,
-        lua_typename, LUA_OK,
+        lua_Alloc, lua_CFunction, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error,
+        lua_getglobal, lua_gettable, lua_gettop, lua_iscfunction, lua_newstate, lua_pcallk,
+        lua_pushboolean, lua_pushcclosure, lua_pushlstring, lua_pushnil, lua_pushnumber,
+        lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable, lua_settop,
+        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -342,6 +371,7 @@
     Number(f64),
     Bool(bool),
     String(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str),
+    CFunction(lua_CFunction),
     Nil,
 }
 <span class="kw">impl </span>From&lt;f64&gt; <span class="kw">for </span>LuaStackValue&lt;<span class="lifetime">&#39;_</span>&gt; {
@@ -362,6 +392,11 @@
 <span class="kw">impl </span>From&lt;<span class="prelude-ty">Option</span>&lt;()&gt;&gt; <span class="kw">for </span>LuaStackValue&lt;<span class="lifetime">&#39;_</span>&gt; {
     <span class="kw">fn </span>from(<span class="kw">_</span>: <span class="prelude-ty">Option</span>&lt;()&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Nil
+    }
+}
+<span class="kw">impl </span>From&lt;lua_CFunction&gt; <span class="kw">for </span>LuaStackValue&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>from(value: lua_CFunction) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::CFunction(value)
     }
 }
 <span class="kw">pub trait </span>LuaCore: LuaConn {
@@ -516,6 +551,12 @@
             lua_pushvalue(<span class="self">self</span>.get_conn().get_mut_ptr(), idx);
         }
     }
+    <span class="doccomment">/// Pushes a C function onto the stack. This function is equivalent to [lua_pushcclosure] with no upvalues.
+    </span><span class="kw">fn </span>push_c_function(<span class="kw-2">&amp;</span><span class="self">self</span>, f: lua_CFunction) {
+        <span class="kw">unsafe </span>{
+            lua_pushcclosure(<span class="self">self</span>.get_conn().get_mut_ptr(), f, <span class="number">0</span>);
+        }
+    }
     <span class="doccomment">/// Pushes value onto stack
     </span><span class="kw">fn </span>push&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;lua</span>, T: Into&lt;LuaStackValue&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;lua </span><span class="self">self</span>, value: T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;lua </span>str&gt; {
         <span class="kw">match </span>value.into() {
@@ -532,6 +573,10 @@
                 <span class="prelude-val">None
             </span>}
             LuaStackValue::String(s) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.push_string(s)),
+            LuaStackValue::CFunction(f) =&gt; {
+                <span class="self">self</span>.push_c_function(f);
+                <span class="prelude-val">None
+            </span>}
         }
     }
     <span class="doccomment">/// Returns true if the value at the given index is nil, and false otherwise.
@@ -553,6 +598,19 @@
     <span class="doccomment">/// Returns true if the value at the given index is a table, and false otherwise.
     </span><span class="kw">fn </span>is_table(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; bool {
         <span class="macro">matches!</span>(<span class="self">self</span>.get_type(idx), LuaType::Table)
+    }
+    <span class="doccomment">/// Returns true if the value at the given index is a function (either C or Lua), and true otherwise.
+    </span><span class="kw">fn </span>is_function(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>.get_type(idx), LuaType::Function)
+    }
+    <span class="doccomment">/// Returns true if the value at the given index is a C function, and false otherwise.
+    </span><span class="kw">fn </span>is_c_function(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; bool {
+        <span class="kw">unsafe </span>{
+            <span class="kw">match </span>lua_iscfunction(<span class="self">self</span>.get_conn().get_mut_ptr(), idx) {
+                <span class="number">0 </span>=&gt; <span class="bool-val">false</span>,
+                <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
+            }
+        }
     }
     <span class="doccomment">/// Equivalent to lua_tolstring with len equal to NULL.
     </span><span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: i32) -&gt; <span class="kw-2">&amp;</span>str {

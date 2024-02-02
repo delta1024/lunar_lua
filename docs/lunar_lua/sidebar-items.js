@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["check_for_err","lua_error"],"mod":["ffi","lua_aux","lua_core","lua_lib","wrapper"],"struct":["LuaConnection","LuaStateRef"],"trait":["LuaConn"]};
+window.SIDEBAR_ITEMS = {"macro":["check_for_err","lua_error"],"mod":["ffi","lua_aux","lua_core","lua_lib","wrapper"],"struct":["LuaConnection","LuaStatePtr","LuaStateRef"],"trait":["LuaConn"]};
