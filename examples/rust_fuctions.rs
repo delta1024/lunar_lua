@@ -1,6 +1,6 @@
 use std::process::exit;
 
-use lunar_lua::{ffi::lua_State, LuaStatePtr, LuaAuxLib, LuaCore, State};
+use lunar_lua::{ffi::lua_State, LuaAuxLib, LuaCore, LuaStatePtr, State};
 
 extern "C" fn l_add_two(state: *mut lua_State) -> i32 {
     let state = LuaStatePtr::from(state);
