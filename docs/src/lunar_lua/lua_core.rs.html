@@ -307,6 +307,7 @@
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::str;
 <span class="kw">use </span>std::{
     ffi::{CStr, CString},
@@ -315,10 +316,11 @@
 
 <span class="kw">use crate</span>::{
     ffi::{
-        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_error, lua_getglobal, lua_gettable,
-        lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring, lua_pushnil,
-        lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable,
-        lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_createtable,
+        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error, lua_getglobal,
+        lua_gettable, lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring,
+        lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal,
+        lua_settable, lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type,
+        lua_typename, LUA_OK,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -363,7 +365,7 @@
     }
 }
 <span class="kw">pub trait </span>LuaCore: LuaConn {
-    <span class="doccomment">/// Creates a new empty table and pushes it onto the stack. It is equivalent to [lua_createtable(L, 0, 0)]. 
+    <span class="doccomment">/// Creates a new empty table and pushes it onto the stack. It is equivalent to [lua_createtable(L, 0, 0)].
     </span><span class="kw">fn </span>new_table(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">unsafe </span>{
             lua_createtable(<span class="self">self</span>.get_conn().get_mut_ptr(), <span class="number">0</span>, <span class="number">0</span>);
