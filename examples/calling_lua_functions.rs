@@ -1,6 +1,6 @@
 use std::process::exit;
 
-use lunar_lua::{LuaStateRef, LuaCore, State, LuaStandardLib, LuaAuxLib};
+use lunar_lua::{LuaAuxLib, LuaCore, LuaStandardLib, LuaStateRef, State};
 const LUA_SRC: &'static str = r#"
 function f (x, y)
   return (x^2 * math.sin(y))/(1 - x)
@@ -33,7 +33,7 @@ fn call_f(state: LuaStateRef<'_>, x: f64, y: f64) -> f64 {
     let z = state.to_number(-1);
     state.pop(1);
     z
-}  
+}
 fn main() {
     let lua = State::new();
     lua.open_math();

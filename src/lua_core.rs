@@ -6,11 +6,11 @@ use std::{
 
 use crate::{
     ffi::{
-        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error, lua_getglobal,
-        lua_gettable, lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring,
-        lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal,
-        lua_settable, lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type,
-        lua_typename, LUA_OK,
+        lua_Alloc, lua_CFunction, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error,
+        lua_getglobal, lua_gettable, lua_gettop, lua_iscfunction, lua_newstate, lua_pcallk,
+        lua_pushboolean, lua_pushcclosure, lua_pushlstring, lua_pushnil, lua_pushnumber,
+        lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable, lua_settop,
+        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -32,6 +32,7 @@ pub enum LuaStackValue<'a> {
     Number(f64),
     Bool(bool),
     String(&'a str),
+    CFunction(lua_CFunction),
     Nil,
 }
 impl From<f64> for LuaStackValue<'_> {
@@ -52,6 +53,11 @@ impl<'a> From<&'a str> for LuaStackValue<'a> {
 impl From<Option<()>> for LuaStackValue<'_> {
     fn from(_: Option<()>) -> Self {
         Self::Nil
+    }
+}
+impl From<lua_CFunction> for LuaStackValue<'_> {
+    fn from(value: lua_CFunction) -> Self {
+        Self::CFunction(value)
     }
 }
 pub trait LuaCore: LuaConn {
@@ -206,6 +212,12 @@ pub trait LuaCore: LuaConn {
             lua_pushvalue(self.get_conn().get_mut_ptr(), idx);
         }
     }
+    /// Pushes a C function onto the stack. This function is equivalent to [lua_pushcclosure] with no upvalues.
+    fn push_c_function(&self, f: lua_CFunction) {
+        unsafe {
+            lua_pushcclosure(self.get_conn().get_mut_ptr(), f, 0);
+        }
+    }
     /// Pushes value onto stack
     fn push<'a, 'lua, T: Into<LuaStackValue<'a>>>(&'lua self, value: T) -> Option<&'lua str> {
         match value.into() {
@@ -222,6 +234,10 @@ pub trait LuaCore: LuaConn {
                 None
             }
             LuaStackValue::String(s) => Some(self.push_string(s)),
+            LuaStackValue::CFunction(f) => {
+                self.push_c_function(f);
+                None
+            }
         }
     }
     /// Returns true if the value at the given index is nil, and false otherwise.
@@ -243,6 +259,19 @@ pub trait LuaCore: LuaConn {
     /// Returns true if the value at the given index is a table, and false otherwise.
     fn is_table(&self, idx: i32) -> bool {
         matches!(self.get_type(idx), LuaType::Table)
+    }
+    /// Returns true if the value at the given index is a function (either C or Lua), and true otherwise.
+    fn is_function(&self, idx: i32) -> bool {
+        matches!(self.get_type(idx), LuaType::Function)
+    }
+    /// Returns true if the value at the given index is a C function, and false otherwise.
+    fn is_c_function(&self, idx: i32) -> bool {
+        unsafe {
+            match lua_iscfunction(self.get_conn().get_mut_ptr(), idx) {
+                0 => false,
+                _ => true,
+            }
+        }
     }
     /// Equivalent to lua_tolstring with len equal to NULL.
     fn to_string(&self, idx: i32) -> &str {

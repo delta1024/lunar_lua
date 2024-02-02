@@ -1,10 +1,10 @@
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 
 use crate::{
     check_for_err,
     ffi::{
-        luaL_error, luaL_loadbufferx, luaL_loadfilex, luaL_newstate, luaL_openlibs, lua_State,
-        LUA_OK,
+        luaL_checklstring, luaL_checknumber, luaL_error, luaL_loadbufferx, luaL_loadfilex,
+        luaL_newstate, luaL_openlibs, lua_State, LUA_OK,
     },
     wrapper::LuaError,
     LuaConn,
@@ -59,6 +59,24 @@ pub trait LuaAuxLib: LuaConn {
     fn aux_open_libs(&self) {
         unsafe {
             luaL_openlibs(self.get_conn().get_mut_ptr());
+        }
+    }
+    /// Checks whether the function argument arg is a number and returns this number converted to a lua_Number.
+    fn aux_check_number(&self, arg: i32) -> f64 {
+        unsafe { luaL_checknumber(self.get_conn().get_mut_ptr(), arg) }
+    }
+    ///  Checks whether the function argument arg is a string and returns this string.
+    ///
+    /// This function uses [crate::ffi::lua_tolstring] to get its result, so all conversions and caveats of that function apply here.
+    fn aux_check_string(&self, arg: i32) -> &str {
+        unsafe {
+            CStr::from_ptr(luaL_checklstring(
+                self.get_conn().get_mut_ptr(),
+                arg,
+                std::ptr::null_mut(),
+            ))
+            .to_str()
+            .unwrap()
         }
     }
     ///  Raises an error. It also adds at the beginning of the message the file name and the line number where the error occurred, if this information is available.

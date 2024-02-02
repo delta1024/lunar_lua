@@ -72,6 +72,9 @@ impl LuaConnection<'_> {
     }
 }
 impl<'state> LuaConnection<'state> {
+    pub unsafe fn from_raw(ptr: *mut lua_State) -> Self {
+        Self(ptr.as_ref().unwrap())
+    }
     pub fn borrow(self) -> LuaStateRef<'state> {
         self.into()
     }
@@ -101,5 +104,18 @@ unsafe impl<'state> LuaConn for LuaStateRef<'state> {
 impl<'state> From<LuaConnection<'state>> for LuaStateRef<'state> {
     fn from(value: LuaConnection<'state>) -> Self {
         Self(value)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct LuaStatePtr(*mut lua_State);
+impl From<*mut lua_State> for LuaStatePtr {
+    fn from(value: *mut lua_State) -> Self {
+        Self(value)
+    }
+}
+unsafe impl LuaConn for LuaStatePtr {
+    fn get_conn(&self) -> LuaConnection<'_> {
+        unsafe { LuaConnection::from_raw(self.0) }
     }
 }
