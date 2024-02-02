@@ -32,6 +32,13 @@
 //!     }
 //!  }
 //! }
+//! impl Drop for State {
+//!     fn drop(&mut self) {
+//!         unsafe {
+//!             self.get_conn().borrow().close_conn();
+//!         }
+//!     }
+//! }
 //! fn main() {
 //!     let lua = State(aux_new_state());
 //!     lua.push(13f64);
@@ -63,7 +70,11 @@ impl LuaConnection<'_> {
     pub unsafe fn get_mut_ptr(&self) -> *mut lua_State {
         (self.0 as *const lua_State).cast_mut()
     }
-
+}
+impl<'state> LuaConnection<'state> {
+    pub fn borrow(self) -> LuaStateRef<'state> {
+        self.into()
+    }
 }
 impl<'state> From<&'state lua_State> for LuaConnection<'state> {
     fn from(value: &'state lua_State) -> Self {
@@ -75,9 +86,9 @@ pub unsafe trait LuaConn {
 }
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy)]
-pub struct LuaStateRef<'state>(LuaConnection<'state>); 
+pub struct LuaStateRef<'state>(LuaConnection<'state>);
 impl LuaStateRef<'_> {
-    /// Closes the underlying lua state. 
+    /// Closes the underlying lua state.
     pub unsafe fn close_conn(self) {
         lua_close(self.get_conn().get_mut_ptr());
     }

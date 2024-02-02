@@ -1,4 +1,4 @@
-# Safe bindings to lua.                                                                  ``
+# Safe bindings to lua.
 
 Like lua, lunar_lua aimes to be extensible.
 For this reson all access to the lua api is provided

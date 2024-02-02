@@ -6,10 +6,11 @@ use std::{
 
 use crate::{
     ffi::{
-        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_error, lua_getglobal, lua_gettable,
-        lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring, lua_pushnil,
-        lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable,
-        lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK, lua_createtable,
+        lua_Alloc, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error, lua_getglobal,
+        lua_gettable, lua_gettop, lua_newstate, lua_pcallk, lua_pushboolean, lua_pushlstring,
+        lua_pushnil, lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal,
+        lua_settable, lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type,
+        lua_typename, LUA_OK,
     },
     LuaConn, LuaError, LuaType,
 };
@@ -54,7 +55,7 @@ impl From<Option<()>> for LuaStackValue<'_> {
     }
 }
 pub trait LuaCore: LuaConn {
-    /// Creates a new empty table and pushes it onto the stack. It is equivalent to [lua_createtable(L, 0, 0)]. 
+    /// Creates a new empty table and pushes it onto the stack. It is equivalent to [lua_createtable(L, 0, 0)].
     fn new_table(&self) {
         unsafe {
             lua_createtable(self.get_conn().get_mut_ptr(), 0, 0);

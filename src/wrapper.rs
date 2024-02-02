@@ -1,4 +1,4 @@
-use std::{ptr::NonNull};
+use std::ptr::NonNull;
 
 use crate::{
     ffi::{luaL_newstate, lua_State},
