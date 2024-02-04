@@ -4,8 +4,9 @@ use lunar_lua::{ffi::lua_State, LuaAuxLib, LuaCore, LuaStatePtr, State};
 
 extern "C" fn l_add_two(state: *mut lua_State) -> i32 {
     let state = LuaStatePtr::from(state);
-    let n = state.aux_check_number(1);
-    state.push(n + 2.0);
+    let conn = state.get_conn().borrow();
+    let n = conn.aux_check_number(1);
+    conn.push(n + 2.0);
     1
 }
 

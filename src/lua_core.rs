@@ -1,18 +1,21 @@
 use core::str;
 use std::{
     ffi::{CStr, CString},
+    marker::PhantomData,
     mem,
+    ops::{Deref, DerefMut},
+    ptr::NonNull,
 };
 
 use crate::{
     ffi::{
         lua_Alloc, lua_CFunction, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error,
-        lua_getglobal, lua_gettable, lua_gettop, lua_iscfunction, lua_newstate, lua_pcallk,
-        lua_pushboolean, lua_pushcclosure, lua_pushlstring, lua_pushnil, lua_pushnumber,
-        lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
+        lua_getglobal, lua_gettable, lua_gettop, lua_iscfunction, lua_newstate, lua_newuserdatauv,
+        lua_pcallk, lua_pushboolean, lua_pushcclosure, lua_pushlstring, lua_pushnil,
+        lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable,
+        lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
     },
-    LuaConn, LuaError, LuaType,
+    LuaConn, LuaError, LuaStateRef, LuaType,
 };
 
 #[macro_export]
@@ -26,6 +29,23 @@ macro_rules! check_for_err {
 /// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call.
 pub fn new_state(f: lua_Alloc, ud: *mut ::std::os::raw::c_void) -> *mut lua_State {
     unsafe { lua_newstate(f, ud) }
+}
+pub struct UserData<'state, T: ?Sized>(NonNull<T>, PhantomData<LuaStateRef<'state>>);
+impl<'state, T: ?Sized> UserData<'state, T> {
+    pub fn new(ptr: *mut T) -> Self {
+        unsafe { Self(NonNull::new_unchecked(ptr), PhantomData) }
+    }
+}
+impl<'state, T: ?Sized> Deref for UserData<'state, T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        unsafe { self.0.as_ref() }
+    }
+}
+impl<'state, T: ?Sized> DerefMut for UserData<'state, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { self.0.as_mut() }
+    }
 }
 ///  a container for valid stack types
 pub enum LuaStackValue<'a> {
@@ -50,8 +70,8 @@ impl<'a> From<&'a str> for LuaStackValue<'a> {
         Self::String(value)
     }
 }
-impl From<Option<()>> for LuaStackValue<'_> {
-    fn from(_: Option<()>) -> Self {
+impl From<()> for LuaStackValue<'_> {
+    fn from(_: ()) -> Self {
         Self::Nil
     }
 }
@@ -65,6 +85,17 @@ pub trait LuaCore: LuaConn {
     fn new_table(&self) {
         unsafe {
             lua_createtable(self.get_conn().get_mut_ptr(), 0, 0);
+        }
+    }
+    ///  This function creates and pushes on the stack a new full userdata, with nuvalue associated Lua values, called user values, plus an associated block of raw memory with size bytes. (The user values can be set and read with the functions lua_setiuservalue and lua_getiuservalue.)
+    ///
+    /// The function returns the address of the block of memory. Lua ensures that this address is valid as long as the corresponding userdata is alive (see §2.5). Moreover, if the userdata is marked for finalization (see §2.5.3), its address is valid at least until the call to its finalizer.
+    fn new_user_data<'state, T>(&'state self, data: T) -> UserData<'state, T> {
+        unsafe {
+            let size = mem::size_of::<T>();
+            let ptr: *mut T = lua_newuserdatauv(self.get_conn().get_mut_ptr(), size, 1).cast();
+            ptr.write(data);
+            UserData(NonNull::new_unchecked(ptr), PhantomData)
         }
     }
     ///  Calls a function (or a callable object) in protected mode.

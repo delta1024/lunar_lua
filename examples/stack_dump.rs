@@ -18,7 +18,7 @@ fn main() {
     let mut lua = State::new();
     lua.push(true);
     lua.push(10f64);
-    lua.push(None);
+    lua.push(());
     lua.push("hello");
     stack_dump(&mut lua);
 

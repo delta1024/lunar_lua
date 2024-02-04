@@ -3,11 +3,12 @@ use std::ffi::{CStr, CString};
 use crate::{
     check_for_err,
     ffi::{
-        luaL_checklstring, luaL_checknumber, luaL_error, luaL_loadbufferx, luaL_loadfilex,
-        luaL_newstate, luaL_openlibs, lua_State, LUA_OK,
+        luaL_Reg, luaL_checklstring, luaL_checknumber, luaL_error, luaL_loadbufferx,
+        luaL_loadfilex, luaL_newstate, luaL_openlibs, luaL_setfuncs, lua_CFunction, lua_State,
+        LUA_OK,
     },
     wrapper::LuaError,
-    LuaConn,
+    LuaConn, LuaCore,
 };
 /// Formats and reports an error. Calls [aux_error](LuaAuxLib::aux_error).
 #[macro_export]
@@ -23,7 +24,7 @@ macro_rules! lua_error {
 pub fn aux_new_state() -> *mut lua_State {
     unsafe { luaL_newstate() }
 }
-pub trait LuaAuxLib: LuaConn {
+pub trait LuaAuxLib: LuaConn + LuaCore {
     /// Equivalent to [luaL_loadbufferx] with mode equal to NULL.
     fn aux_load_buffer(&self, buff: &str, name: &str) -> Result<(), LuaError> {
         let (buff, name) = (
@@ -59,6 +60,30 @@ pub trait LuaAuxLib: LuaConn {
     fn aux_open_libs(&self) {
         unsafe {
             luaL_openlibs(self.get_conn().get_mut_ptr());
+        }
+    }
+    /// Creates a new table and registers there the functions in regs.
+    fn aux_new_lib(&self, regs: &[(&str, lua_CFunction)]) {
+        let names = regs
+            .iter()
+            .map(|(name, _)| CString::new(name.to_string()).unwrap())
+            .collect::<Vec<_>>();
+        let mut n = regs
+            .iter()
+            .map(|(_, f)| *f)
+            .zip(names.iter())
+            .map(|(f, n)| luaL_Reg {
+                name: n.as_ptr(),
+                func: f,
+            })
+            .collect::<Vec<_>>();
+        n.push(luaL_Reg {
+            name: std::ptr::null(),
+            func: None,
+        });
+        self.new_table();
+        unsafe {
+            luaL_setfuncs(self.get_conn().get_mut_ptr(), n.as_ptr(), 0);
         }
     }
     /// Checks whether the function argument arg is a number and returns this number converted to a lua_Number.

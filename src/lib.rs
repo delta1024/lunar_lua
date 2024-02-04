@@ -53,6 +53,7 @@
 //!
 //! extern "C" fn l_add_two(state: *mut lua_State) -> i32 {
 //!     let state = LuaStatePtr::from(state);
+//!     let state = state.get_conn().borrow()
 //!     let n = state.aux_check_number(1);
 //!     state.push(n + 2.0);
 //!     1
@@ -138,13 +139,13 @@ impl<'state> From<LuaConnection<'state>> for LuaStateRef<'state> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct LuaStatePtr(*mut lua_State);
+impl LuaStatePtr {
+    pub fn get_conn(&self) -> LuaConnection<'_> {
+        LuaConnection(unsafe { self.0.as_ref().unwrap() })
+    }
+}
 impl From<*mut lua_State> for LuaStatePtr {
     fn from(value: *mut lua_State) -> Self {
         Self(value)
-    }
-}
-unsafe impl LuaConn for LuaStatePtr {
-    fn get_conn(&self) -> LuaConnection<'_> {
-        unsafe { LuaConnection::from_raw(self.0) }
     }
 }
