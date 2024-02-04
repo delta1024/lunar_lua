@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Safe bindings to lua."><title>lunar_lua - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="lunar_lua" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../lunar_lua/index.html">lunar_lua</a><span class="version">0.0.1</span></h2></div><div class="sidebar-elems"><ul class="block">
-            <li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">lunar_lua</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../src/lunar_lua/lib.rs.html#1-151">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="safe-bindings-to-lua"><a href="#safe-bindings-to-lua">Safe bindings to lua.</a></h2>
+            <li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">lunar_lua</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../src/lunar_lua/lib.rs.html#1-197">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="safe-bindings-to-lua"><a href="#safe-bindings-to-lua">Safe bindings to lua.</a></h2>
 <p>Like lua, lunar_lua aimes to be extensible.
 For this reson all access to the lua api is provided
 through three traits:</p>
@@ -48,7 +48,7 @@ through three traits:</p>
 
 <span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>l_add_two(state: <span class="kw-2">*mut </span>lua_State) -&gt; i32 {
     <span class="kw">let </span>state = LuaStatePtr::from(state);
-    <span class="kw">let </span>state = state.get_conn().borrow()
+    <span class="kw">let </span>state = state.get_conn().borrow();
     <span class="kw">let </span>n = state.aux_check_number(<span class="number">1</span>);
     state.push(n + <span class="number">2.0</span>);
     <span class="number">1
@@ -68,5 +68,48 @@ through three traits:</p>
 
     lua.get_global(<span class="string">&quot;result&quot;</span>);
     <span class="macro">assert_eq!</span>(<span class="number">5.0</span>, lua.to_number(-<span class="number">1</span>));
+}</code></pre></div>
+<h2 id="writing-a-lua-library-in-rust"><a href="#writing-a-lua-library-in-rust">Writing a Lua Library in Rust</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>lunar_lua::{
+    ffi::{lua_CFunction, lua_State},
+    LuaAuxLib, LuaCore, LuaStatePtr, LuaStateRef, State,
+};
+ 
+<span class="kw">fn </span>add(state: LuaStateRef&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; i32 {
+    <span class="kw">let </span>a = state.aux_check_number(<span class="number">1</span>);
+    <span class="kw">let </span>b = state.aux_check_number(<span class="number">2</span>);
+    state.push(a + b);
+    <span class="number">1
+</span>}
+<span class="kw">fn </span>sub(state: LuaStateRef&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; i32 {
+    <span class="kw">let </span>a = state.aux_check_number(<span class="number">1</span>);
+    <span class="kw">let </span>b = state.aux_check_number(<span class="number">2</span>);
+    state.push(a - b);
+    <span class="number">1
+</span>}
+ 
+<span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>l_add(state: <span class="kw-2">*mut </span>lua_State) -&gt; i32 {
+    <span class="kw">let </span>state = LuaStatePtr::from(state);
+    add(state.get_conn().borrow())
+}
+<span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>l_sub(state: <span class="kw-2">*mut </span>lua_State) -&gt; i32 {
+    <span class="kw">let </span>state = LuaStatePtr::from(state);
+    sub(state.get_conn().borrow())
+}
+<span class="kw">const </span>REGS: [(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, lua_CFunction); <span class="number">2</span>] = [(<span class="string">&quot;add&quot;</span>, <span class="prelude-val">Some</span>(l_add)), (<span class="string">&quot;sub&quot;</span>, <span class="prelude-val">Some</span>(l_sub))];
+<span class="kw">fn </span>main() {
+    <span class="kw">let </span>state = State::new();
+    state.aux_new_lib(<span class="kw-2">&amp;</span>REGS);
+    state.set_global(<span class="string">&quot;rmath&quot;</span>);
+    <span class="kw">let </span>src = <span class="string">r#&quot;
+    local n = rmath.add(3, 2)
+    m = rmath.sub(n, 2)
+    &quot;#</span>;
+    <span class="kw">if </span>state.aux_load_buffer(<span class="kw-2">&amp;</span>src, <span class="string">&quot;example&quot;</span>).is_err() || state.pcall(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>).is_err() {
+        <span class="kw">let </span>msg = state.to_string(-<span class="number">1</span>);
+        <span class="macro">eprintln!</span>(<span class="string">&quot;Error: {msg}&quot;</span>);
+    }
+    state.get_global(<span class="string">&quot;m&quot;</span>);
+    <span class="macro">assert_eq!</span>(<span class="number">3.0</span>, state.to_number(-<span class="number">1</span>));
 }</code></pre></div>
 </div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2><ul class="item-table"><li><div class="item-name" id="reexport.LuaAuxLib"><code>pub use lua_aux::<a class="trait" href="lua_aux/trait.LuaAuxLib.html" title="trait lunar_lua::lua_aux::LuaAuxLib">LuaAuxLib</a>;</code></div></li><li><div class="item-name" id="reexport.LuaCore"><code>pub use lua_core::<a class="trait" href="lua_core/trait.LuaCore.html" title="trait lunar_lua::lua_core::LuaCore">LuaCore</a>;</code></div></li><li><div class="item-name" id="reexport.LuaStandardLib"><code>pub use lua_lib::<a class="trait" href="lua_lib/trait.LuaStandardLib.html" title="trait lunar_lua::lua_lib::LuaStandardLib">LuaStandardLib</a>;</code></div></li><li><div class="item-name"><code>pub use <a class="mod" href="wrapper/index.html" title="mod lunar_lua::wrapper">wrapper</a>::*;</code></div></li></ul><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><ul class="item-table"><li><div class="item-name"><a class="mod" href="ffi/index.html" title="mod lunar_lua::ffi">ffi</a></div><div class="desc docblock-short">Raw bindings to lua</div></li><li><div class="item-name"><a class="mod" href="lua_aux/index.html" title="mod lunar_lua::lua_aux">lua_aux</a></div></li><li><div class="item-name"><a class="mod" href="lua_core/index.html" title="mod lunar_lua::lua_core">lua_core</a></div></li><li><div class="item-name"><a class="mod" href="lua_lib/index.html" title="mod lunar_lua::lua_lib">lua_lib</a></div></li><li><div class="item-name"><a class="mod" href="wrapper/index.html" title="mod lunar_lua::wrapper">wrapper</a></div><div class="desc docblock-short">Default lua wrapper.</div></li></ul><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2><ul class="item-table"><li><div class="item-name"><a class="macro" href="macro.check_for_err.html" title="macro lunar_lua::check_for_err">check_for_err</a></div></li><li><div class="item-name"><a class="macro" href="macro.lua_error.html" title="macro lunar_lua::lua_error">lua_error</a></div><div class="desc docblock-short">Formats and reports an error. Calls <a href="lua_aux/trait.LuaAuxLib.html#method.aux_error" title="method lunar_lua::lua_aux::LuaAuxLib::aux_error">aux_error</a>.</div></li></ul><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><ul class="item-table"><li><div class="item-name"><a class="struct" href="struct.LuaConnection.html" title="struct lunar_lua::LuaConnection">LuaConnection</a></div></li><li><div class="item-name"><a class="struct" href="struct.LuaStatePtr.html" title="struct lunar_lua::LuaStatePtr">LuaStatePtr</a></div></li><li><div class="item-name"><a class="struct" href="struct.LuaStateRef.html" title="struct lunar_lua::LuaStateRef">LuaStateRef</a></div></li></ul><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2><ul class="item-table"><li><div class="item-name"><a class="trait" href="trait.LuaConn.html" title="trait lunar_lua::LuaConn">LuaConn</a></div></li></ul></section></div></main></body></html>

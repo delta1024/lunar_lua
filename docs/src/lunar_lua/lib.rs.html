@@ -149,6 +149,52 @@
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! # Safe bindings to lua.
 //!
 //! Like lua, lunar_lua aimes to be extensible.
@@ -204,7 +250,7 @@
 //!
 //! extern &quot;C&quot; fn l_add_two(state: *mut lua_State) -&gt; i32 {
 //!     let state = LuaStatePtr::from(state);
-//!     let state = state.get_conn().borrow()
+//!     let state = state.get_conn().borrow();
 //!     let n = state.aux_check_number(1);
 //!     state.push(n + 2.0);
 //!     1
@@ -224,6 +270,52 @@
 //!
 //!     lua.get_global(&quot;result&quot;);
 //!     assert_eq!(5.0, lua.to_number(-1));
+//! }
+//! ```
+//!
+//! # Writing a Lua Library in Rust
+//! ```
+//! use lunar_lua::{
+//!     ffi::{lua_CFunction, lua_State},
+//!     LuaAuxLib, LuaCore, LuaStatePtr, LuaStateRef, State,
+//! };
+//! 
+//! fn add(state: LuaStateRef&lt;&#39;_&gt;) -&gt; i32 {
+//!     let a = state.aux_check_number(1);
+//!     let b = state.aux_check_number(2);
+//!     state.push(a + b);
+//!     1
+//! }
+//! fn sub(state: LuaStateRef&lt;&#39;_&gt;) -&gt; i32 {
+//!     let a = state.aux_check_number(1);
+//!     let b = state.aux_check_number(2);
+//!     state.push(a - b);
+//!     1
+//! }
+//! 
+//! extern &quot;C&quot; fn l_add(state: *mut lua_State) -&gt; i32 {
+//!     let state = LuaStatePtr::from(state);
+//!     add(state.get_conn().borrow())
+//! }
+//! extern &quot;C&quot; fn l_sub(state: *mut lua_State) -&gt; i32 {
+//!     let state = LuaStatePtr::from(state);
+//!     sub(state.get_conn().borrow())
+//! }
+//! const REGS: [(&amp;&#39;static str, lua_CFunction); 2] = [(&quot;add&quot;, Some(l_add)), (&quot;sub&quot;, Some(l_sub))];
+//! fn main() {
+//!     let state = State::new();
+//!     state.aux_new_lib(&amp;REGS);
+//!     state.set_global(&quot;rmath&quot;);
+//!     let src = r#&quot;
+//!     local n = rmath.add(3, 2)
+//!     m = rmath.sub(n, 2)
+//!     &quot;#;
+//!     if state.aux_load_buffer(&amp;src, &quot;example&quot;).is_err() || state.pcall(0, 0, 0).is_err() {
+//!         let msg = state.to_string(-1);
+//!         eprintln!(&quot;Error: {msg}&quot;);
+//!     }
+//!     state.get_global(&quot;m&quot;);
+//!     assert_eq!(3.0, state.to_number(-1));
 //! }
 //! ```
 
