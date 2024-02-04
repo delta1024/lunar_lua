@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"lunar_lua":[["impl&lt;'state, T: ?<a class=\"trait\" href=\"https://doc.rust-lang.org/1.75.0/core/marker/trait.Sized.html\" title=\"trait core::marker::Sized\">Sized</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.75.0/core/ops/deref/trait.Deref.html\" title=\"trait core::ops::deref::Deref\">Deref</a> for <a class=\"struct\" href=\"lunar_lua/lua_core/struct.UserData.html\" title=\"struct lunar_lua::lua_core::UserData\">UserData</a>&lt;'state, T&gt;"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -90,16 +90,42 @@
 <a href="#90" id="90">90</a>
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ffi::{CStr, CString};
 
 <span class="kw">use crate</span>::{
     check_for_err,
     ffi::{
-        luaL_checklstring, luaL_checknumber, luaL_error, luaL_loadbufferx, luaL_loadfilex,
-        luaL_newstate, luaL_openlibs, lua_State, LUA_OK,
+        luaL_Reg, luaL_checklstring, luaL_checknumber, luaL_error, luaL_loadbufferx,
+        luaL_loadfilex, luaL_newstate, luaL_openlibs, luaL_setfuncs, lua_CFunction, lua_State,
+        LUA_OK,
     },
     wrapper::LuaError,
-    LuaConn,
+    LuaConn, LuaCore,
 };
 <span class="doccomment">/// Formats and reports an error. Calls [aux_error](LuaAuxLib::aux_error).
 </span><span class="attr">#[macro_export]
@@ -115,7 +141,7 @@
 </span><span class="kw">pub fn </span>aux_new_state() -&gt; <span class="kw-2">*mut </span>lua_State {
     <span class="kw">unsafe </span>{ luaL_newstate() }
 }
-<span class="kw">pub trait </span>LuaAuxLib: LuaConn {
+<span class="kw">pub trait </span>LuaAuxLib: LuaConn + LuaCore {
     <span class="doccomment">/// Equivalent to [luaL_loadbufferx] with mode equal to NULL.
     </span><span class="kw">fn </span>aux_load_buffer(<span class="kw-2">&amp;</span><span class="self">self</span>, buff: <span class="kw-2">&amp;</span>str, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(), LuaError&gt; {
         <span class="kw">let </span>(buff, name) = (
@@ -151,6 +177,30 @@
     </span><span class="kw">fn </span>aux_open_libs(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">unsafe </span>{
             luaL_openlibs(<span class="self">self</span>.get_conn().get_mut_ptr());
+        }
+    }
+    <span class="doccomment">/// Creates a new table and registers there the functions in regs.
+    </span><span class="kw">fn </span>aux_new_lib(<span class="kw-2">&amp;</span><span class="self">self</span>, regs: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, lua_CFunction)]) {
+        <span class="kw">let </span>names = regs
+            .iter()
+            .map(|(name, <span class="kw">_</span>)| CString::new(name.to_string()).unwrap())
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span><span class="kw-2">mut </span>n = regs
+            .iter()
+            .map(|(<span class="kw">_</span>, f)| <span class="kw-2">*</span>f)
+            .zip(names.iter())
+            .map(|(f, n)| luaL_Reg {
+                name: n.as_ptr(),
+                func: f,
+            })
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        n.push(luaL_Reg {
+            name: std::ptr::null(),
+            func: <span class="prelude-val">None</span>,
+        });
+        <span class="self">self</span>.new_table();
+        <span class="kw">unsafe </span>{
+            luaL_setfuncs(<span class="self">self</span>.get_conn().get_mut_ptr(), n.as_ptr(), <span class="number">0</span>);
         }
     }
     <span class="doccomment">/// Checks whether the function argument arg is a number and returns this number converted to a lua_Number.

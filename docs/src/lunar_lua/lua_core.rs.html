@@ -337,21 +337,55 @@
 <a href="#337" id="337">337</a>
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::str;
 <span class="kw">use </span>std::{
     ffi::{CStr, CString},
+    marker::PhantomData,
     mem,
+    ops::{Deref, DerefMut},
+    ptr::NonNull,
 };
 
 <span class="kw">use crate</span>::{
     ffi::{
         lua_Alloc, lua_CFunction, lua_State, lua_checkstack, lua_copy, lua_createtable, lua_error,
-        lua_getglobal, lua_gettable, lua_gettop, lua_iscfunction, lua_newstate, lua_pcallk,
-        lua_pushboolean, lua_pushcclosure, lua_pushlstring, lua_pushnil, lua_pushnumber,
-        lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable, lua_settop,
-        lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
+        lua_getglobal, lua_gettable, lua_gettop, lua_iscfunction, lua_newstate, lua_newuserdatauv,
+        lua_pcallk, lua_pushboolean, lua_pushcclosure, lua_pushlstring, lua_pushnil,
+        lua_pushnumber, lua_pushstring, lua_pushvalue, lua_rotate, lua_setglobal, lua_settable,
+        lua_settop, lua_toboolean, lua_tolstring, lua_tonumberx, lua_type, lua_typename, LUA_OK,
     },
-    LuaConn, LuaError, LuaType,
+    LuaConn, LuaError, LuaStateRef, LuaType,
 };
 
 <span class="attr">#[macro_export]
@@ -365,6 +399,23 @@
 <span class="doccomment">/// Creates a new independent state and returns its main thread. Returns NULL if it cannot create the state (due to lack of memory). The argument f is the allocator function; Lua will do all memory allocation for this state through this function (see lua_Alloc). The second argument, ud, is an opaque pointer that Lua passes to the allocator in every call.
 </span><span class="kw">pub fn </span>new_state(f: lua_Alloc, ud: <span class="kw-2">*mut </span>::std::os::raw::c_void) -&gt; <span class="kw-2">*mut </span>lua_State {
     <span class="kw">unsafe </span>{ lua_newstate(f, ud) }
+}
+<span class="kw">pub struct </span>UserData&lt;<span class="lifetime">&#39;state</span>, T: <span class="question-mark">?</span>Sized&gt;(NonNull&lt;T&gt;, PhantomData&lt;LuaStateRef&lt;<span class="lifetime">&#39;state</span>&gt;&gt;);
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;state</span>, T: <span class="question-mark">?</span>Sized&gt; UserData&lt;<span class="lifetime">&#39;state</span>, T&gt; {
+    <span class="kw">pub fn </span>new(ptr: <span class="kw-2">*mut </span>T) -&gt; <span class="self">Self </span>{
+        <span class="kw">unsafe </span>{ <span class="self">Self</span>(NonNull::new_unchecked(ptr), PhantomData) }
+    }
+}
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;state</span>, T: <span class="question-mark">?</span>Sized&gt; Deref <span class="kw">for </span>UserData&lt;<span class="lifetime">&#39;state</span>, T&gt; {
+    <span class="kw">type </span>Target = T;
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.<span class="number">0</span>.as_ref() }
+    }
+}
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;state</span>, T: <span class="question-mark">?</span>Sized&gt; DerefMut <span class="kw">for </span>UserData&lt;<span class="lifetime">&#39;state</span>, T&gt; {
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.<span class="number">0</span>.as_mut() }
+    }
 }
 <span class="doccomment">///  a container for valid stack types
 </span><span class="kw">pub enum </span>LuaStackValue&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -389,8 +440,8 @@
         <span class="self">Self</span>::String(value)
     }
 }
-<span class="kw">impl </span>From&lt;<span class="prelude-ty">Option</span>&lt;()&gt;&gt; <span class="kw">for </span>LuaStackValue&lt;<span class="lifetime">&#39;_</span>&gt; {
-    <span class="kw">fn </span>from(<span class="kw">_</span>: <span class="prelude-ty">Option</span>&lt;()&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;()&gt; <span class="kw">for </span>LuaStackValue&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>from(<span class="kw">_</span>: ()) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Nil
     }
 }
@@ -404,6 +455,17 @@
     </span><span class="kw">fn </span>new_table(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">unsafe </span>{
             lua_createtable(<span class="self">self</span>.get_conn().get_mut_ptr(), <span class="number">0</span>, <span class="number">0</span>);
+        }
+    }
+    <span class="doccomment">///  This function creates and pushes on the stack a new full userdata, with nuvalue associated Lua values, called user values, plus an associated block of raw memory with size bytes. (The user values can be set and read with the functions lua_setiuservalue and lua_getiuservalue.)
+    ///
+    /// The function returns the address of the block of memory. Lua ensures that this address is valid as long as the corresponding userdata is alive (see §2.5). Moreover, if the userdata is marked for finalization (see §2.5.3), its address is valid at least until the call to its finalizer.
+    </span><span class="kw">fn </span>new_user_data&lt;<span class="lifetime">&#39;state</span>, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;state </span><span class="self">self</span>, data: T) -&gt; UserData&lt;<span class="lifetime">&#39;state</span>, T&gt; {
+        <span class="kw">unsafe </span>{
+            <span class="kw">let </span>size = mem::size_of::&lt;T&gt;();
+            <span class="kw">let </span>ptr: <span class="kw-2">*mut </span>T = lua_newuserdatauv(<span class="self">self</span>.get_conn().get_mut_ptr(), size, <span class="number">1</span>).cast();
+            ptr.write(data);
+            UserData(NonNull::new_unchecked(ptr), PhantomData)
         }
     }
     <span class="doccomment">///  Calls a function (or a callable object) in protected mode.
