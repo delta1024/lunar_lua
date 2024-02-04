@@ -1,6 +1,6 @@
 use lunar_lua::{
     ffi::{lua_CFunction, lua_State},
-    LuaAuxLib, LuaConn, LuaCore, LuaStatePtr, LuaStateRef, State,
+    LuaAuxLib, LuaCore, LuaStatePtr, LuaStateRef, State,
 };
 
 fn add(state: LuaStateRef<'_>) -> i32 {
@@ -30,7 +30,7 @@ fn main() {
     state.aux_new_lib(&REGS);
     state.set_global("rmath");
     let src = r#"
-    n = rmath.add(3, 2)
+    local n = rmath.add(3, 2)
     m = rmath.sub(n, 2)
     "#;
     if state.aux_load_buffer(&src, "example").is_err() || state.pcall(0, 0, 0).is_err() {
